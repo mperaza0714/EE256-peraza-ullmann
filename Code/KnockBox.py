@@ -24,7 +24,7 @@ led.direction = digitalio.Direction.OUTPUT
 # Button
 button = digitalio.DigitalInOut(board.D18)
 button.direction = digitalio.Direction.INPUT
-button.pull = digitalio.Pull.UP
+button.pull = digitalio.Pull.DOWN
 pushed = Debouncer(button)
 
 # Force Sensor
