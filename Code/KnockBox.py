@@ -18,13 +18,13 @@ from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 ## Set up the pins
 
 # LED
-led = digitalio.DigitalInOut(board.D17)
+led = digitalio.DigitalInOut(board.PB09)
 led.direction = digitalio.Direction.OUTPUT
 
 # Button
 button = digitalio.DigitalInOut(board.D18)
 button.direction = digitalio.Direction.INPUT
-button.pull = digitalio.Pull.DOWN
+button.pull = digitalio.Push.UP
 pushed = Debouncer(button)
 
 # Force Sensor
@@ -34,6 +34,14 @@ knockDetected = False
 
 # Microphone
 #TODO
+
+# Speaker
+audio = audioio.AudioOut(board.D11)
+# Preload example audio
+wave_file = open("/sd/Audio/example.wav", "rb") # Note the "/sd/" prefix for the SD card
+wave = audioio.WaveFile(wave_file)              # Everything else is the same ...
+
+## Setup SPI Devices
 
 # CD Card
 # Use a digital pin to select the SD card
@@ -45,7 +53,6 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 sdcard = adafruit_sdcard.SDCard(spi, cs)
 vfs = storage.VfsFat(sdcard)
 storage.mount(vfs, "/sd")
-
 # Speaker
 audio = audioio.AudioOut(board.D11)
 # Preload example audio
@@ -71,13 +78,12 @@ except ImportError:
 esp32_cs = DigitalInOut(board.D10)
 esp32_ready = DigitalInOut(board.D4)
 esp32_reset = DigitalInOut(board.D6)
-
-spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 print("Connecting to AP...")
 while not esp.is_connected:
     try:
+        #TODO
         esp.connect_AP(secrets["ssid"], secrets["password"])
     except RuntimeError as e:
         print("could not connect to AP, retrying: ", e)
@@ -87,6 +93,7 @@ print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
 socket.set_interface(esp)
 requests.set_socket(socket, esp)
 
+#TODO
 aio_username = secrets["aio_username"]
 aio_key = secrets["aio_key"]
 
@@ -110,6 +117,15 @@ print("Data sent!")
 print("Retrieving data from temperature feed...")
 received_data = io.receive_data(temperature_feed["key"])
 print("Data from temperature feed: ", received_data["value"])
+
+## State Machine Setup
+
+idleState = 0
+recordState = 1
+playState = 2
+knockState = 3
+# initial state
+state = idleState
 
 
 while True:
