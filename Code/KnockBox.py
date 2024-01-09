@@ -45,7 +45,7 @@ wave = audioio.WaveFile(wave_file)              # Everything else is the same ..
 
 # CD Card
 # Use a digital pin to select the SD card
-cs = digitalio.DigitalInOut(board.D9)
+cs = digitalio.DigitalInOut(board.PA19)
 # Wire up the SPI pins
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 # Connect to the card and mount the filesystem.
@@ -54,7 +54,7 @@ sdcard = adafruit_sdcard.SDCard(spi, cs)
 vfs = storage.VfsFat(sdcard)
 storage.mount(vfs, "/sd")
 # Speaker
-audio = audioio.AudioOut(board.D11)
+audio = audioio.AudioOut(board.PA12)
 # Preload example audio
 wave_file = open("/sd/Audio/example.wav", "rb") # Note the "/sd/" prefix for the SD card
 wave = audioio.WaveFile(wave_file)              # Everything else is the same ...
